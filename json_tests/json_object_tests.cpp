@@ -7,12 +7,7 @@ using namespace json;
 TEST(JsonObjectTests, EmptyJsonTest)
 {
     const wstring EMPTY_STRING;
-    auto json = JsonObject::FromString(EMPTY_STRING);
-
-    auto& data = json[L"Data"].GetAsString() = L"MyData";
-    data = L"MyData";
-
-    EXPECT_EQ(L"MyData", json[L"Data"].GetAsString());
+    ASSERT_NO_THROW(JsonObject::FromString(EMPTY_STRING));
 }
 
 TEST(JsonObjectTests, SimpleJsonTest)
@@ -41,4 +36,24 @@ TEST(JsonObjectTests, SimpleJsonTest)
     EXPECT_EQ(L"Иван", firstName);
     EXPECT_EQ(L"Московское ш., 101, кв.101", streetAddress);
     EXPECT_EQ(L"916 123-4567", secondNumber);
+}
+
+TEST(JsonObjectTests, InvalidJsonTest)
+{
+    const auto INVALID_JSON_STRING = LR"({"key" : })"s;
+    ASSERT_ANY_THROW(JsonObject::FromString(INVALID_JSON_STRING));
+}
+
+TEST(JsonObjectTests, DoubleJsonTest)
+{
+    const auto DOUBLE_JSON_STRING = LR"({"key" : 123} [true, false])"s;
+    ASSERT_ANY_THROW(JsonObject::FromString(DOUBLE_JSON_STRING));
+}
+
+TEST(JsonObjectTests, AddDataTest)
+{
+    JsonObject json;
+    auto& data = json[L"Data"].GetAsString();
+    data = L"MyData";
+    EXPECT_EQ(L"MyData", json[L"Data"].GetAsString());
 }
