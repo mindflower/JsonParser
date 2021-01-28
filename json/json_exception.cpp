@@ -51,7 +51,7 @@ namespace json
 
     const char* JsonAccessException::what() const
     {
-        return "JsonAccessException occured";;
+        return "JsonAccessException occured";
     }
 
     wstring JsonAccessException::Description() const

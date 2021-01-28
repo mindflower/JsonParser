@@ -28,7 +28,7 @@ namespace json
         bool IsObject() const;
         bool IsArray() const;
         bool IsString() const;
-        bool IsAny() const;
+        bool IsEmpty() const;
 
     private:
         std::variant<std::monostate, Map, Array, std::wstring> m_container;

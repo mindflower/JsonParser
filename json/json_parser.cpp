@@ -41,7 +41,6 @@ namespace json
             }
         }
         EndJson();
-        return;
     }
 
     void JsonParser::StartObject()

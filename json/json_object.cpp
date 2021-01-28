@@ -6,7 +6,7 @@ using namespace std;
 
 namespace json
 {
-    JsonObject JsonObject::FromString(const std::wstring& json)
+    JsonObject JsonObject::FromString(const wstring& json)
     {
         return JsonParser{json}.Get();
     }
@@ -15,10 +15,12 @@ namespace json
         m_container(value)
     {
     }
+
     JsonObject::JsonObject(const Map&& jsonMap) :
         m_container(jsonMap)
     {
     }
+
     JsonObject::JsonObject(const Array&& jsonArray) :
         m_container(jsonArray)
     {
@@ -26,7 +28,7 @@ namespace json
 
     wstring& JsonObject::GetAsString()
     {
-        if (IsAny())
+        if (IsEmpty())
         {
             m_container = wstring{};
         }
@@ -39,9 +41,10 @@ namespace json
             throw JsonAccessException(JsonAccessException::Type::STRING);
         }
     }
+
     JsonObject& JsonObject::operator[](const wstring& key)
     {
-        if (IsAny())
+        if (IsEmpty())
         {
             m_container = Map{};
         }
@@ -54,9 +57,10 @@ namespace json
             throw JsonAccessException(JsonAccessException::Type::OBJECT);
         }
     }
+
     JsonObject& JsonObject::operator[](int index)
     {
-        if (IsAny())
+        if (IsEmpty())
         {
             m_container = Array{};
         }
@@ -85,7 +89,7 @@ namespace json
         return holds_alternative<wstring>(m_container);
     }
 
-    bool JsonObject::IsAny() const
+    bool JsonObject::IsEmpty() const
     {
         return holds_alternative<monostate>(m_container);
     }
