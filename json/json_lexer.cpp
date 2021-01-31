@@ -1,5 +1,6 @@
 #include "json_lexer.h"
 #include "json_exception.h"
+#include <regex>
 
 using namespace std;
 
@@ -32,6 +33,7 @@ namespace json
         case L' ':
         case L'\t':
             return ProcessSpace();
+        case L'-':
         case L'0':
         case L'1':
         case L'2':
@@ -44,7 +46,7 @@ namespace json
         case L'9':
             return ProcessNumber();
         default:
-            return ProcessBooleanAndOther();
+            return ProcessOther();
         }
     }
 
@@ -68,44 +70,48 @@ namespace json
 
     JsonLexer::TokenInfo JsonLexer::ProcessNumber()
     {
-        const auto oldOffset = m_offset;
-        auto c = m_json.at(m_offset);
-        while (isdigit(c) && m_offset < m_json.size()) c = m_json.at(++m_offset);
-
-        if (m_offset >= m_json.size())
+        size_t characterReadCount = 0;
+        stod(m_json.substr(m_offset), &characterReadCount);
+        if (0 != characterReadCount)
         {
-            throw JsonParseException(m_json.substr(m_offset - 1, 1), m_offset - 1);
-        }
-        return {JsonLexer::Token::NUMBER, oldOffset, m_offset - oldOffset};
-    }
-
-    JsonLexer::TokenInfo JsonLexer::ProcessBooleanAndOther()
-    {
-        auto c = m_json.at(m_offset);
-        if (m_offset + 3 < m_size && L't' == c)
-        {
-            if (L'r' == m_json.at(m_offset + 1) &&
-                L'u' == m_json.at(m_offset + 2) &&
-                L'e' == m_json.at(m_offset + 3))
-            {
-                m_offset += 4;
-                return {JsonLexer::Token::TRUE, m_offset - 4, 4};
-            }
-        }
-        else if (m_offset + 4 < m_size && 'f' == c)
-        {
-            if (L'a' == m_json.at(m_offset + 1) &&
-                L'l' == m_json.at(m_offset + 2) &&
-                L's' == m_json.at(m_offset + 3) &&
-                L'e' == m_json.at(m_offset + 4))
-            {
-                m_offset += 5;
-                return {JsonLexer::Token::FALSE, m_offset - 5, 5};
-            }
+            const auto oldOffset = m_offset;
+            m_offset += characterReadCount;
+            return {JsonLexer::Token::NUMBER, oldOffset, characterReadCount};
         }
         else
         {
-            throw JsonParseException(m_json.substr(m_offset, 1), m_offset);
+            throw JsonParseException(m_json.substr(m_offset - 1, 1), m_offset - 1);
+        }
+    }
+
+    JsonLexer::TokenInfo JsonLexer::ProcessOther()
+    {
+        static const wregex TRUE_REGEX(L"true");
+        static const wregex FALSE_REGEX(L"false");
+        static const wregex NULL_REGEX(L"null");
+        static const size_t TRUE_SIZE = 4;
+        static const size_t FALSE_SIZE = 5;
+        static const size_t NULL_SIZE = 4;
+
+        const auto oldOffset = m_offset;
+        if (regex_match(m_json.substr(m_offset, TRUE_SIZE), TRUE_REGEX))
+        {
+            m_offset += TRUE_SIZE;
+            return {JsonLexer::Token::TRUE, oldOffset, TRUE_SIZE};
+        }
+        else if (regex_match(m_json.substr(m_offset, FALSE_SIZE), FALSE_REGEX))
+        {
+            m_offset += FALSE_SIZE;
+            return {JsonLexer::Token::FALSE, oldOffset, FALSE_SIZE};
+        }
+        else if (regex_match(m_json.substr(m_offset, NULL_SIZE), NULL_REGEX))
+        {
+            m_offset += NULL_SIZE;
+            return {JsonLexer::Token::NIL, oldOffset, NULL_SIZE};
+        }
+        else
+        {
+            throw JsonParseException(m_json.substr(m_offset - 1, 1), m_offset - 1);
         }
     }
 

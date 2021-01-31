@@ -10,6 +10,27 @@ TEST(JsonObjectTests, EmptyJsonTest)
     ASSERT_NO_THROW(JsonObject::FromString(EMPTY_STRING));
 }
 
+TEST(JsonObjectTests, InvalidJsonTest)
+{
+    const auto INVALID_JSON_STRING = LR"({"key" : })"s;
+    ASSERT_ANY_THROW(JsonObject::FromString(INVALID_JSON_STRING));
+}
+
+TEST(JsonObjectTests, NullJsonTest)
+{
+    const auto TEST_JSON = LR"([null])"s;
+    auto json = JsonObject::FromString(TEST_JSON);
+
+    ASSERT_FALSE(json.IsEmpty());
+    ASSERT_TRUE(json[0].IsEmpty());
+}
+
+TEST(JsonObjectTests, DoubleJsonTest)
+{
+    const auto DOUBLE_JSON_STRING = LR"({"key" : 123} [true, false])"s;
+    ASSERT_ANY_THROW(JsonObject::FromString(DOUBLE_JSON_STRING));
+}
+
 TEST(JsonObjectTests, SimpleJsonTest)
 {
     const auto TEST_JSON =
@@ -29,31 +50,33 @@ TEST(JsonObjectTests, SimpleJsonTest)
         ;
 
     auto json = JsonObject::FromString(TEST_JSON);
-    const auto& firstName = json[L"firstName"].GetAsString();
-    const auto& streetAddress = json[L"address"][L"streetAddress"].GetAsString();
-    const auto& secondNumber = json[L"phoneNumbers"][1].GetAsString();
+    const auto firstName = json[L"firstName"].GetAsString();
+    const auto streetAddress = json[L"address"][L"streetAddress"].GetAsString();
+    const auto postalCode = json[L"address"][L"postalCode"].GetAsInt64();
+    const auto secondNumber = json[L"phoneNumbers"][1].GetAsString();
 
     EXPECT_EQ(L"Иван", firstName);
     EXPECT_EQ(L"Московское ш., 101, кв.101", streetAddress);
+    EXPECT_EQ(101101, postalCode);
     EXPECT_EQ(L"916 123-4567", secondNumber);
-}
-
-TEST(JsonObjectTests, InvalidJsonTest)
-{
-    const auto INVALID_JSON_STRING = LR"({"key" : })"s;
-    ASSERT_ANY_THROW(JsonObject::FromString(INVALID_JSON_STRING));
-}
-
-TEST(JsonObjectTests, DoubleJsonTest)
-{
-    const auto DOUBLE_JSON_STRING = LR"({"key" : 123} [true, false])"s;
-    ASSERT_ANY_THROW(JsonObject::FromString(DOUBLE_JSON_STRING));
 }
 
 TEST(JsonObjectTests, AddDataTest)
 {
     JsonObject json;
-    auto& data = json[L"Data"].GetAsString();
-    data = L"MyData";
-    EXPECT_EQ(L"MyData", json[L"Data"].GetAsString());
+    json[L"string data"] = L"data";
+    json[L"number data"] = 123;
+    json[L"bool data"] = true;
+
+    ASSERT_TRUE(json[L"string data"].IsString());
+    ASSERT_TRUE(json[L"number data"].IsNumber());
+    ASSERT_TRUE(json[L"bool data"].IsBool());
+
+    const auto stringData = json[L"string data"].GetAsString();
+    const auto numberData = json[L"number data"].GetAsDobule();
+    const auto boolData = json[L"bool data"].GetAsBool();
+
+    EXPECT_EQ(L"data", stringData);
+    EXPECT_EQ(123, numberData);
+    EXPECT_EQ(true, boolData);
 }

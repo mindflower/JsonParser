@@ -22,7 +22,9 @@ namespace json
         {
             OBJECT,
             ARRAY,
-            STRING
+            STRING,
+            NUMBER,
+            BOOL
         };
 
     public:
