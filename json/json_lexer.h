@@ -19,6 +19,7 @@ namespace json
             NUMBER,
             TRUE,
             FALSE,
+            NIL,
             SPACE,
             NEW_LINE
         };
@@ -37,7 +38,7 @@ namespace json
     private:
         TokenInfo ProcessString();
         TokenInfo ProcessNumber();
-        TokenInfo ProcessBooleanAndOther();
+        TokenInfo ProcessOther();
         TokenInfo ProcessSpace();
         TokenInfo ProcessNewLine();
 

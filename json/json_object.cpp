@@ -16,6 +16,16 @@ namespace json
     {
     }
 
+    JsonObject::JsonObject(const double value) :
+        m_container(value)
+    {
+    }
+
+    JsonObject::JsonObject(const bool value) :
+        m_container(value)
+    {
+    }
+
     JsonObject::JsonObject(const Map&& jsonMap) :
         m_container(jsonMap)
     {
@@ -26,19 +36,56 @@ namespace json
     {
     }
 
-    wstring& JsonObject::GetAsString()
+    wstring JsonObject::GetAsString() const
     {
-        if (IsEmpty())
-        {
-            m_container = wstring{};
-        }
         if (IsString())
         {
             return get<wstring>(m_container);
         }
+        else if (IsNumber())
+        {
+            return to_wstring(get<double>(m_container));
+        }
+        else if (IsBool())
+        {
+            return get<bool>(m_container) ? L"true" : L"false";
+        }
+        else if (IsEmpty())
+        {
+            return L"null";
+        }
         else
         {
             throw JsonAccessException(JsonAccessException::Type::STRING);
+        }
+    }
+
+    double JsonObject::GetAsDobule() const
+    {
+        if (IsNumber())
+        {
+            return get<double>(m_container);
+        }
+        else
+        {
+            throw JsonAccessException(JsonAccessException::Type::NUMBER);
+        }
+    }
+
+    int64_t JsonObject::GetAsInt64() const
+    {
+        return static_cast<int64_t>(GetAsDobule());
+    }
+
+    bool JsonObject::GetAsBool() const
+    {
+        if (IsBool())
+        {
+            return get<bool>(m_container);
+        }
+        else
+        {
+            throw JsonAccessException(JsonAccessException::Type::BOOL);
         }
     }
 
@@ -58,7 +105,7 @@ namespace json
         }
     }
 
-    JsonObject& JsonObject::operator[](int index)
+    JsonObject& JsonObject::operator[](const int index)
     {
         if (IsEmpty())
         {
@@ -74,6 +121,18 @@ namespace json
         }
     }
 
+    JsonObject& JsonObject::operator=(const wstring& value)
+    {
+        m_container = wstring{value};
+        return *this;
+    }
+
+    JsonObject& JsonObject::operator=(const double value)
+    {
+        m_container = value;
+        return *this;
+    }
+
     bool JsonObject::IsObject() const
     {
         return holds_alternative<Map>(m_container);
@@ -87,6 +146,16 @@ namespace json
     bool JsonObject::IsString() const
     {
         return holds_alternative<wstring>(m_container);
+    }
+
+    bool JsonObject::IsNumber() const
+    {
+        return holds_alternative<double>(m_container);
+    }
+
+    bool JsonObject::IsBool() const
+    {
+        return holds_alternative<bool>(m_container);
     }
 
     bool JsonObject::IsEmpty() const

@@ -23,6 +23,34 @@ TEST(JsonLexerTests, BracesBracketTest)
     EXPECT_EQ(JsonLexer::Token::END, lexer.GetNextToken().type);
 }
 
+TEST(JsonLexerTests, NumberTest)
+{
+    const auto TEST_STRING = L"123 123.123 -123e123 123e-123"s;
+    JsonLexer lexer(TEST_STRING);
+    EXPECT_EQ(JsonLexer::Token::NUMBER, lexer.GetNextToken().type);
+    EXPECT_EQ(JsonLexer::Token::SPACE, lexer.GetNextToken().type);
+    EXPECT_EQ(JsonLexer::Token::NUMBER, lexer.GetNextToken().type);
+    EXPECT_EQ(JsonLexer::Token::SPACE, lexer.GetNextToken().type);
+    EXPECT_EQ(JsonLexer::Token::NUMBER, lexer.GetNextToken().type);
+    EXPECT_EQ(JsonLexer::Token::SPACE, lexer.GetNextToken().type);
+    EXPECT_EQ(JsonLexer::Token::NUMBER, lexer.GetNextToken().type);
+    EXPECT_EQ(JsonLexer::Token::END, lexer.GetNextToken().type);
+}
+
+TEST(JsonLexerTests, NumberTrueFalseNullTest)
+{
+    const auto TEST_STRING = L"123e+123 true false null"s;
+    JsonLexer lexer(TEST_STRING);
+    EXPECT_EQ(JsonLexer::Token::NUMBER, lexer.GetNextToken().type);
+    EXPECT_EQ(JsonLexer::Token::SPACE, lexer.GetNextToken().type);
+    EXPECT_EQ(JsonLexer::Token::TRUE, lexer.GetNextToken().type);
+    EXPECT_EQ(JsonLexer::Token::SPACE, lexer.GetNextToken().type);
+    EXPECT_EQ(JsonLexer::Token::FALSE, lexer.GetNextToken().type);
+    EXPECT_EQ(JsonLexer::Token::SPACE, lexer.GetNextToken().type);
+    EXPECT_EQ(JsonLexer::Token::NIL,  lexer.GetNextToken().type);
+    EXPECT_EQ(JsonLexer::Token::END, lexer.GetNextToken().type);
+}
+
 TEST(JsonLexerTests, JsonSimpleObjectTest)
 {
     const auto JSON_ELEMENT_STRING = LR"({"key" : 1337})"s;

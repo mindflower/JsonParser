@@ -36,6 +36,7 @@ namespace json
             case JsonLexer::Token::NUMBER:
             case JsonLexer::Token::TRUE:
             case JsonLexer::Token::FALSE:
+            case JsonLexer::Token::NIL:
                 PushValue();
                 break;
             }
@@ -123,7 +124,7 @@ namespace json
 
     void JsonParser::PushValue()
     {
-        const auto validObjectKey = [this]()
+        const auto validObjectKey = [this]() -> bool
         {
             if (auto pState = get_if<State>(&m_stateStack.top()))
             {
@@ -140,7 +141,31 @@ namespace json
 
         if (validObjectKey)
         {
-            m_stateStack.emplace(m_json.substr(m_tokenInfo.offset, m_tokenInfo.size));
+            if (JsonLexer::Token::STRING == m_tokenInfo.type)
+            {
+                m_stateStack.emplace(m_json.substr(m_tokenInfo.offset, m_tokenInfo.size));
+            }
+            else if (JsonLexer::Token::NUMBER == m_tokenInfo.type)
+            {
+                const auto number = stod(m_json.substr(m_tokenInfo.offset, m_tokenInfo.size));
+                m_stateStack.emplace(JsonObject{number});
+            }
+            else if (JsonLexer::Token::TRUE == m_tokenInfo.type)
+            {
+                m_stateStack.emplace(JsonObject{true});
+            }
+            else if (JsonLexer::Token::FALSE == m_tokenInfo.type)
+            {
+                m_stateStack.emplace(JsonObject{false});
+            }
+            else if (JsonLexer::Token::NIL == m_tokenInfo.type)
+            {
+                m_stateStack.emplace(JsonObject{});
+            }
+            else
+            {
+                throw JsonParseException(m_json.substr(m_tokenInfo.offset, m_tokenInfo.size), m_tokenInfo.offset);
+            }
         }
         else
         {
