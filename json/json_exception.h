@@ -7,12 +7,11 @@ namespace json
     class JsonParseException : public std::exception
     {
     public:
-        JsonParseException(const std::wstring& token, size_t position);
+        JsonParseException(const std::string& symbol, size_t position);
         const char* what() const override;
-        std::wstring Description() const;
 
     private:
-        std::wstring m_description;
+        std::string m_description;
     };
 
     class JsonAccessException : public std::exception
@@ -30,9 +29,8 @@ namespace json
     public:
         JsonAccessException(Type type);
         const char* what() const override;
-        std::wstring Description() const;
 
     private:
-        std::wstring m_description;
+        std::string m_description;
     };
 }

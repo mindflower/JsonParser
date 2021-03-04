@@ -32,7 +32,7 @@ namespace json
         };
 
     public:
-        JsonLexer(const std::wstring& json);
+        JsonLexer(const std::string& json);
         TokenInfo GetNextToken();
 
     private:
@@ -43,7 +43,7 @@ namespace json
         TokenInfo ProcessNewLine();
 
     private:
-        const std::wstring& m_json;
+        const std::string& m_json;
         size_t m_offset = 0;
         size_t m_size = 0;
     };

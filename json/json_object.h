@@ -9,29 +9,29 @@ namespace json
     class JsonObject
     {
     public:
-        using Map = std::map<std::wstring, JsonObject>;
+        using Map = std::map<std::string, JsonObject>;
         using Array = std::vector<JsonObject>;
 
     public:
-        static JsonObject FromString(const std::wstring& json);
+        static JsonObject FromString(const std::string& json);
 
     public:
         JsonObject() = default;
-        explicit JsonObject(const std::wstring& value);
+        explicit JsonObject(const std::string& value);
         explicit JsonObject(double value);
         explicit JsonObject(bool value);
-        explicit JsonObject(const Map&& jsonMap);
-        explicit JsonObject(const Array&& jsonArray);
+        explicit JsonObject(Map&& jsonMap);
+        explicit JsonObject(Array&& jsonArray);
 
-        std::wstring GetAsString() const;
-        double GetAsDobule() const;
+        std::string GetAsString() const;
+        double GetAsDouble() const;
         int64_t GetAsInt64() const;
         bool GetAsBool() const;
 
-        JsonObject& operator[](const std::wstring& key);
+        JsonObject& operator[](const std::string& key);
         JsonObject& operator[](int index);
 
-        JsonObject& operator=(const std::wstring& value);
+        JsonObject& operator=(const std::string& value);
         JsonObject& operator=(double value);
 
         template <class T, class Y = std::enable_if_t<std::is_same<T, bool>{}>>
@@ -49,6 +49,6 @@ namespace json
         bool IsEmpty() const;
 
     private:
-        std::variant<std::monostate, Map, Array, std::wstring, double, bool> m_container;
+        std::variant<std::monostate, Map, Array, std::string, double, bool> m_container;
     };
 }

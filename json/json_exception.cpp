@@ -1,61 +1,43 @@
 #include "json_exception.h"
-#include <map>
 #include <sstream>
 
 using namespace std;
 
 namespace json
 {
-    JsonParseException::JsonParseException(const wstring& symbol, size_t position)
+    JsonParseException::JsonParseException(const string& symbol, const size_t position)
     {
-        wstringstream ss;
+        stringstream ss;
         ss << "Unexpected symbol found near \'" << symbol << "\' at position " << position << '.';
         m_description = ss.str();
     }
 
     const char* JsonParseException::what() const
     {
-        return "JsonParseException occured";
+        return m_description.c_str();
     }
 
-    wstring JsonParseException::Description() const
+    JsonAccessException::JsonAccessException(const Type type)
     {
-        return m_description;
-    }
-
-    JsonAccessException::JsonAccessException(JsonAccessException::Type type)
-    {
-        static const map<Type, wstring> converter = {
-            {Type::OBJECT, L"Object"},
-            {Type::ARRAY, L"Array"},
-            {Type::STRING, L"String"}
-        };
-
-        const auto typeStr = [&type]() -> wstring
+        const auto typeStr = [&type]() -> string
         {
-            const auto it = converter.find(type);
-            if (it != converter.end())
+            switch(type)
             {
-                return it->second;
-            }
-            else
-            {
-                return L"Unknown";
+            case Type::OBJECT: return "Object"s;
+            case Type::ARRAY: return "Array"s;
+            case Type::STRING: return "String"s;
+            default:
+                return "Unknown"s;
             }
         }();
 
-        wstringstream ss;
+        stringstream ss;
         ss << "Bad access to storage value. Expected type \'" << typeStr << "\'.";
         m_description = ss.str();
     }
 
     const char* JsonAccessException::what() const
     {
-        return "JsonAccessException occured";
-    }
-
-    wstring JsonAccessException::Description() const
-    {
-        return m_description;
+        return m_description.c_str();
     }
 }

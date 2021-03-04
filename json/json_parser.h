@@ -12,7 +12,7 @@ namespace json
     class JsonParser
     {
     public:
-        JsonParser(const std::wstring& json);
+        JsonParser(const std::string& json);
         JsonObject Get() const;
 
     private:
@@ -40,16 +40,16 @@ namespace json
         bool IsJsonStart() const;
         bool IsObjectStart() const;
         bool IsArrayStart() const;
-        std::pair<std::wstring, JsonObject> PopObjectValue();
+        std::pair<std::string, JsonObject> PopObjectValue();
         JsonObject PopArrayValue();
         JsonObject PopJsonObject();
 
     private:
         JsonLexer m_lexer;
         JsonObject m_container;
-        std::wstring m_json;
+        std::string m_json;
         JsonLexer::TokenInfo m_tokenInfo;
-        std::stack<std::variant<std::wstring, JsonObject, State>> m_stateStack;
+        std::stack<std::variant<std::string, JsonObject, State>> m_stateStack;
         std::stack<State> m_context;
     };
 }

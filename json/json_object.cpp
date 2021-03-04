@@ -6,12 +6,12 @@ using namespace std;
 
 namespace json
 {
-    JsonObject JsonObject::FromString(const wstring& json)
+    JsonObject JsonObject::FromString(const string& json)
     {
         return JsonParser{json}.Get();
     }
 
-    JsonObject::JsonObject(const wstring& value) :
+    JsonObject::JsonObject(const string& value) :
         m_container(value)
     {
     }
@@ -26,55 +26,53 @@ namespace json
     {
     }
 
-    JsonObject::JsonObject(const Map&& jsonMap) :
+    JsonObject::JsonObject(Map&& jsonMap) :
         m_container(jsonMap)
     {
     }
 
-    JsonObject::JsonObject(const Array&& jsonArray) :
+    JsonObject::JsonObject(Array&& jsonArray) :
         m_container(jsonArray)
     {
     }
 
-    wstring JsonObject::GetAsString() const
+    string JsonObject::GetAsString() const
     {
         if (IsString())
         {
-            return get<wstring>(m_container);
+            return get<string>(m_container);
         }
-        else if (IsNumber())
+        if (IsNumber())
         {
-            return to_wstring(get<double>(m_container));
+            return to_string(get<double>(m_container));
         }
-        else if (IsBool())
+        if (IsBool())
         {
-            return get<bool>(m_container) ? L"true" : L"false";
+            return get<bool>(m_container) ? "true" : "false";
         }
-        else if (IsEmpty())
+        if (IsEmpty())
         {
-            return L"null";
+            return "null";
         }
-        else
-        {
-            throw JsonAccessException(JsonAccessException::Type::STRING);
-        }
+        throw JsonAccessException(JsonAccessException::Type::STRING);
     }
 
-    double JsonObject::GetAsDobule() const
+    double JsonObject::GetAsDouble() const
     {
         if (IsNumber())
         {
             return get<double>(m_container);
         }
-        else
+        if (IsEmpty())
         {
-            throw JsonAccessException(JsonAccessException::Type::NUMBER);
+            return 0;
         }
+        throw JsonAccessException(JsonAccessException::Type::NUMBER);
     }
 
     int64_t JsonObject::GetAsInt64() const
     {
-        return static_cast<int64_t>(GetAsDobule());
+        return static_cast<int64_t>(GetAsDouble());
     }
 
     bool JsonObject::GetAsBool() const
@@ -89,7 +87,7 @@ namespace json
         }
     }
 
-    JsonObject& JsonObject::operator[](const wstring& key)
+    JsonObject& JsonObject::operator[](const string& key)
     {
         if (IsEmpty())
         {
@@ -99,10 +97,7 @@ namespace json
         {
             return get<Map>(m_container)[key];
         }
-        else
-        {
-            throw JsonAccessException(JsonAccessException::Type::OBJECT);
-        }
+        throw JsonAccessException(JsonAccessException::Type::OBJECT);
     }
 
     JsonObject& JsonObject::operator[](const int index)
@@ -115,15 +110,12 @@ namespace json
         {
             return get<Array>(m_container)[index];
         }
-        else
-        {
-            throw JsonAccessException(JsonAccessException::Type::ARRAY);
-        }
+        throw JsonAccessException(JsonAccessException::Type::ARRAY);
     }
 
-    JsonObject& JsonObject::operator=(const wstring& value)
+    JsonObject& JsonObject::operator=(const string& value)
     {
-        m_container = wstring{value};
+        m_container = value;
         return *this;
     }
 
@@ -145,7 +137,7 @@ namespace json
 
     bool JsonObject::IsString() const
     {
-        return holds_alternative<wstring>(m_container);
+        return holds_alternative<string>(m_container);
     }
 
     bool JsonObject::IsNumber() const

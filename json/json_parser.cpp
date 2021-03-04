@@ -1,22 +1,21 @@
 #include "json_parser.h"
 #include "json_exception.h"
 #include <sstream>
-#include <list>
 
 using namespace std;
 
 namespace json
 {
-    JsonParser::JsonParser(const wstring& json) :
-        m_json(json),
-        m_lexer(json)
+    JsonParser::JsonParser(const string& json) :
+        m_lexer(json),
+        m_json(json)
     {
         Parse();
     }
 
     JsonObject JsonParser::Get() const
     {
-        return m_container;;
+        return m_container;
     }
 
     void JsonParser::Parse()
@@ -39,6 +38,7 @@ namespace json
             case JsonLexer::Token::NIL:
                 PushValue();
                 break;
+            default: break;
             }
         }
         EndJson();
@@ -126,7 +126,7 @@ namespace json
     {
         const auto validObjectKey = [this]() -> bool
         {
-            if (auto pState = get_if<State>(&m_stateStack.top()))
+            if (const auto* pState = get_if<State>(&m_stateStack.top()))
             {
                 const auto state = *pState;
                 if (State::READ_OBJECT == m_context.top() &&
@@ -187,44 +187,35 @@ namespace json
 
     bool JsonParser::IsJsonStart() const
     {
-        if (auto pState = get_if<State>(&m_stateStack.top()))
+        if (const auto* pState = get_if<State>(&m_stateStack.top()))
         {
             return State::READ_JSON == *pState;
         }
-        else
-        {
-            return false;
-        }
+        return false;
     }
 
     bool JsonParser::IsObjectStart() const
     {
-        if (auto pState = get_if<State>(&m_stateStack.top()))
+        if (const auto* pState = get_if<State>(&m_stateStack.top()))
         {
             return State::READ_OBJECT == *pState;
         }
-        else
-        {
-            return false;
-        }
+        return false;
     }
 
     bool JsonParser::IsArrayStart() const
     {
-        if (auto pState = get_if<State>(&m_stateStack.top()))
+        if (const auto* pState = get_if<State>(&m_stateStack.top()))
         {
             return State::READ_ARRAY == *pState;
         }
-        else
-        {
-            return false;
-        }
+        return false;
     }
 
-    pair<wstring, JsonObject> JsonParser::PopObjectValue()
+    pair<string, JsonObject> JsonParser::PopObjectValue()
     {
         const auto value = PopJsonObject();
-        if (auto pState = get_if<State>(&m_stateStack.top()))
+        if (const auto* pState = get_if<State>(&m_stateStack.top()))
         {
             if (State::READ_OBJECT_VALUE != *pState)
             {
@@ -233,21 +224,18 @@ namespace json
         }
         m_stateStack.pop();
 
-        const auto key = [this]() -> wstring
+        const auto key = [this]() -> string
         {
-            if (auto pKey = get_if<wstring>(&m_stateStack.top()))
+            if (const auto* pKey = get_if<string>(&m_stateStack.top()))
             {
-                const auto key = *pKey;
+                auto storedKey = *pKey;
                 m_stateStack.pop();
-                return key;
+                return storedKey;
             }
-            else
-            {
-                throw JsonParseException(m_json.substr(m_tokenInfo.offset, m_tokenInfo.size), m_tokenInfo.offset);
-            }
+            throw JsonParseException(m_json.substr(m_tokenInfo.offset, m_tokenInfo.size), m_tokenInfo.offset);
         }();
 
-        if (auto pState = get_if<State>(&m_stateStack.top()))
+        if (const auto* pState = get_if<State>(&m_stateStack.top()))
         {
             const auto state = *pState;
             if (State::READ_OBJECT_KEY == state)
@@ -264,8 +252,8 @@ namespace json
 
     JsonObject JsonParser::PopArrayValue()
     { 
-        const auto value = PopJsonObject();
-        if (auto pState = get_if<State>(&m_stateStack.top()))
+        auto value = PopJsonObject();
+        if (const auto* pState = get_if<State>(&m_stateStack.top()))
         {
             const auto state = *pState;
             if (State::READ_ARRAY_VALUE == state)
@@ -282,10 +270,10 @@ namespace json
 
     JsonObject JsonParser::PopJsonObject()
     {
-        const auto value = visit([this](auto& arg) -> JsonObject
+        auto value = visit([this](auto& arg) -> JsonObject
         {
             using T = decay_t<decltype(arg)>;
-            if constexpr (is_same_v<T, wstring>)
+            if constexpr (is_same_v<T, string>)
             {
                 return JsonObject{arg};
             }

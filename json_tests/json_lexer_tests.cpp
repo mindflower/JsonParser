@@ -6,7 +6,7 @@ using namespace json;
 
 TEST(JsonLexerTests, EmptyStringTest)
 {
-    const wstring EMPTY_STRING;
+    const string EMPTY_STRING;
     JsonLexer lexer(EMPTY_STRING);
     const auto token = lexer.GetNextToken();
     EXPECT_EQ(JsonLexer::Token::END ,token.type);
@@ -14,7 +14,7 @@ TEST(JsonLexerTests, EmptyStringTest)
 
 TEST(JsonLexerTests, BracesBracketTest)
 {
-    const auto TEST_STRING = L"{}[]"s;
+    const auto TEST_STRING = "{}[]"s;
     JsonLexer lexer(TEST_STRING);
     EXPECT_EQ(JsonLexer::Token::BRACE_LEFT, lexer.GetNextToken().type);
     EXPECT_EQ(JsonLexer::Token::BRACE_RIGTH, lexer.GetNextToken().type);
@@ -25,7 +25,7 @@ TEST(JsonLexerTests, BracesBracketTest)
 
 TEST(JsonLexerTests, NumberTest)
 {
-    const auto TEST_STRING = L"123 123.123 -123e123 123e-123"s;
+    const auto TEST_STRING = "123 123.123 -123e123 123e-123"s;
     JsonLexer lexer(TEST_STRING);
     EXPECT_EQ(JsonLexer::Token::NUMBER, lexer.GetNextToken().type);
     EXPECT_EQ(JsonLexer::Token::SPACE, lexer.GetNextToken().type);
@@ -39,7 +39,7 @@ TEST(JsonLexerTests, NumberTest)
 
 TEST(JsonLexerTests, NumberTrueFalseNullTest)
 {
-    const auto TEST_STRING = L"123e+123 true false null"s;
+    const auto TEST_STRING = "123e+123 true false null"s;
     JsonLexer lexer(TEST_STRING);
     EXPECT_EQ(JsonLexer::Token::NUMBER, lexer.GetNextToken().type);
     EXPECT_EQ(JsonLexer::Token::SPACE, lexer.GetNextToken().type);
@@ -53,13 +53,13 @@ TEST(JsonLexerTests, NumberTrueFalseNullTest)
 
 TEST(JsonLexerTests, JsonSimpleObjectTest)
 {
-    const auto JSON_ELEMENT_STRING = LR"({"key" : 1337})"s;
+    const auto JSON_ELEMENT_STRING = R"({"key" : 1337})"s;
     JsonLexer lexer(JSON_ELEMENT_STRING);
     EXPECT_EQ(JsonLexer::Token::BRACE_LEFT, lexer.GetNextToken().type);
 
     const auto stringInfo = lexer.GetNextToken();
     EXPECT_EQ(JsonLexer::Token::STRING, stringInfo.type);
-    EXPECT_EQ(L"key", JSON_ELEMENT_STRING.substr(stringInfo.offset, stringInfo.size));
+    EXPECT_EQ("key", JSON_ELEMENT_STRING.substr(stringInfo.offset, stringInfo.size));
 
     EXPECT_EQ(JsonLexer::Token::SPACE, lexer.GetNextToken().type);
     EXPECT_EQ(JsonLexer::Token::COLON, lexer.GetNextToken().type);
@@ -72,7 +72,7 @@ TEST(JsonLexerTests, JsonSimpleObjectTest)
 TEST(JsonLexerTests, JsonComplcatedObjectTest)
 {
     const auto JSON_ELEMENT_STRING =
-        LR"({
+        R"({
                 "key" : [
                     "value",1337,true,false
                 ]
